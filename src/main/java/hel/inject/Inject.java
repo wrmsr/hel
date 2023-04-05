@@ -9,11 +9,15 @@ import javax.annotation.concurrent.Immutable;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Spliterator;
 import java.util.StringJoiner;
+import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
 
@@ -107,7 +111,7 @@ public final class Inject {
                 if (am == null) {
                     am = new HashMap<>();
                 }
-                am.computeIfAbsent(b.key, (k) -> new ArrayList<>()).add(b.provider);
+                am.computeIfAbsent(b.key, k -> new ArrayList<>()).add(b.provider);
             } else {
                 if (pm.containsKey(b.key)) {
                     throw new DuplicateBindingError(b.key);
@@ -128,26 +132,47 @@ public final class Inject {
         private final Key key;
         private final Provider provider;
 
-        private final Map<Key, ProviderFn> pfm;
-
         public Binding(Key key, Provider provider) {
             this.key = requireNonNull(key);
             this.provider = requireNonNull(provider);
-
-            this.pfm = new HashMap<>();
         }
     }
 
-    public interface Bindings extends Iterable<Binding> {
+    public static final class Bindings implements Iterable<Binding> {
+        private final Iterable<Binding> it;
+
+        public Bindings(Iterable<Binding> it) {
+            this.it = requireNonNull(it);
+        }
+
+        @Override
+        public Iterator<Binding> iterator() {
+            return it.iterator();
+        }
+
+        @Override
+        public void forEach(Consumer<? super Binding> action) {
+            it.forEach(action);
+        }
+
+        @Override
+        public Spliterator<Binding> spliterator() {
+            return it.spliterator();
+        }
     }
 
     public static final class Injector {
         private final Bindings bs;
         private final @Nullable Injector parent;
 
+        private final Map<Key, ProviderFn> pfm;
+
         public Injector(Bindings bs, @Nullable Injector parent) {
             this.bs = requireNonNull(bs);
             this.parent = parent;
+
+            Map<Key, Provider> pm = makeProviderMap(bs);
+            this.pfm = pm.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().providerFn()));
         }
     }
 }
