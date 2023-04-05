@@ -2,7 +2,7 @@
 TODO:
  - records
 */
-package hel.inject;
+package com.wrmsr.hel.inject;
 
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
@@ -173,6 +173,11 @@ public final class Inject {
 
             Map<Key, Provider> pm = makeProviderMap(bs);
             this.pfm = pm.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().providerFn()));
+        }
+
+        @Nullable
+        public Object maybeProvide(Key k) {
+            return null;
         }
     }
 }
