@@ -1,5 +1,8 @@
 /*
-TODO:
+TODO (func):
+ - erasure lol
+
+TODO (style):
  - records
 */
 package com.wrmsr.hel.inject;
@@ -64,6 +67,24 @@ public final class Inject {
         Type providedTy(Function<Key, Type> rec);
 
         ProviderFn providerFn();
+    }
+
+    public static final class ConstProvider implements Provider {
+        private final Object v;
+
+        public ConstProvider(Object v) {
+            this.v = requireNonNull(v);
+        }
+
+        @Override
+        public Type providedTy(Function<Key, Type> rec) {
+            return v.getClass();
+        }
+
+        @Override
+        public ProviderFn providerFn() {
+            return inj -> v;
+        }
     }
 
     public static abstract class KeyException extends RuntimeException {
