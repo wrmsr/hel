@@ -1,26 +1,32 @@
 package com.wrmsr.hel.inject;
 
 import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 
 import static java.util.Objects.requireNonNull;
 
 public class TypeLit<T> {
-    final Type ty;
+    final Class<? extends T> ty;
     final int hashCode;
 
+    @SuppressWarnings({"unchecked"})
+    private static <T> Class<? extends T> getParam(Class<?> cls) {
+        Class<?> pCls = (Class<?>) ((ParameterizedType) cls.getGenericSuperclass()).getActualTypeArguments()[0];
+        return (Class<? extends T>) pCls;
+    }
+
     public TypeLit() {
-        ty = ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
+        ty = getParam(getClass());
         hashCode = ty.hashCode();
     }
 
-    public TypeLit(Type ty) {
+    public TypeLit(Class<? extends T> ty) {
         this.ty = requireNonNull(ty);
         hashCode = this.ty.hashCode();
     }
 
     public static <T> TypeLit<T> of() {
-        return new TypeLit<>();
+        return new TypeLit<T>() {
+        };
     }
 
     @Override

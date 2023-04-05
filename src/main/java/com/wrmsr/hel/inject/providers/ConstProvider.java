@@ -18,7 +18,7 @@ public final class ConstProvider<T> implements Provider<T> {
 
     @Override
     public TypeLit<T> providedTy(Function<Key<T>, TypeLit<T>> rec) {
-        return new TypeLit<>(v.getClass());
+        return TypeLit.of();
     }
 
     @Override
