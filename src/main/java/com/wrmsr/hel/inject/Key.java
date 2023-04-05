@@ -17,8 +17,20 @@ public final class Key<T> {
         this.tag = tag;
     }
 
-    public static <T> Key<T> of() {
-        return new Key<>(TypeLit.of(), false, null);
+    public static <T> Key<T> of(Class<? extends T> cls) {
+        return new Key<>(new TypeLit<>(cls), false, null);
+    }
+
+    public static <T> Key<T> of(Class<? extends T> cls, Object tag) {
+        return new Key<>(new TypeLit<>(cls), false, tag);
+    }
+
+    public static <T> Key<T> ofMulti(Class<? extends T> cls) {
+        return new Key<>(new TypeLit<>(cls), true, null);
+    }
+
+    public static <T> Key<T> ofMulti(Class<? extends T> cls, Object tag) {
+        return new Key<>(new TypeLit<>(cls), true, tag);
     }
 
     @Override

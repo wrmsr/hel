@@ -24,11 +24,6 @@ public class TypeLit<T> {
         hashCode = this.ty.hashCode();
     }
 
-    public static <T> TypeLit<T> of() {
-        return new TypeLit<T>() {
-        };
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

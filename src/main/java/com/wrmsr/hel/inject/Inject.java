@@ -43,5 +43,5 @@ public final class Inject {
         return pm;
     }
 
-    public static final Key<Injector> injectorKey = new Key<>(TypeLit.of(), false, null);
+    public static final Key<Injector> injectorKey = new Key<>(new TypeLit<>(Injector.class), false, null);
 }
