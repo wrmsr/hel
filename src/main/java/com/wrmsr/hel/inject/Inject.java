@@ -57,7 +57,7 @@ public final class Inject {
     }
 
     @FunctionalInterface
-    public interface ProviderFn extends Function<Object, Object> {
+    public interface ProviderFn extends Function<Injector, Object> {
     }
 
     public interface Provider {
@@ -161,6 +161,8 @@ public final class Inject {
         }
     }
 
+    public static final Key injectorKey = new Key(Injector.class, false, null);
+
     public static final class Injector {
         private final Bindings bs;
         private final @Nullable Injector parent;
@@ -177,6 +179,22 @@ public final class Inject {
 
         @Nullable
         public Object maybeProvide(Key k) {
+            if (k.equals(injectorKey)) {
+                return this;
+            }
+
+            ProviderFn pfn = pfm.get(k);
+            if (pfn != null) {
+                return pfn.apply(this);
+            }
+
+            if (parent != null) {
+                Object po = parent.maybeProvide(k);
+                if (po != null) {
+                    return po;
+                }
+            }
+
             return null;
         }
     }
