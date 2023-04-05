@@ -62,37 +62,65 @@ public final class Inject {
         ProviderFn providerFn();
     }
 
-    private static Map<Key, ProviderFn> makeProviderMap(Bindings bs) {
-        Map<Key, ProviderFn> pm = new HashMap<>();
+    public static abstract class KeyException extends RuntimeException {
+        protected final Key key;
+
+        protected KeyException(Key key) {
+            this.key = requireNonNull(key);
+        }
+    }
+
+    public static final class DuplicateBindingError extends KeyException {
+        public DuplicateBindingError(Key key) {
+            super(key);
+        }
+    }
+
+    private static final class ArrayProvider implements Provider {
+        private final Type ty;
+        private final List<Provider> ps;
+
+        private ArrayProvider(
+                Type ty,
+                List<Provider> ps
+        ) {
+            this.ty = requireNonNull(ty);
+            this.ps = requireNonNull(ps);
+        }
+
+        @Override
+        public Type providedTy(Function<Key, Type> rec) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public ProviderFn providerFn() {
+            throw new UnsupportedOperationException();
+        }
+    }
+
+    private static Map<Key, Provider> makeProviderMap(Bindings bs) {
+        Map<Key, Provider> pm = new HashMap<>();
         Map<Key, List<Provider>> am = null;
         for (Binding b : bs) {
             if (b.key.arr) {
                 if (am == null) {
                     am = new HashMap<>();
                 }
-                am.computeIfAbsent(b.key, (k) -> {
-                    return new ArrayList<Provider>();
-                });
-//                am.put(b.key, )
+                am.computeIfAbsent(b.key, (k) -> new ArrayList<>()).add(b.provider);
+            } else {
+                if (pm.containsKey(b.key)) {
+                    throw new DuplicateBindingError(b.key);
+                }
+                pm.put(b.key, b.provider);
             }
         }
-        /*
-                    am[b.key] = append(am[b.key], b.provider)
-                } else {
-                    if _, ok := pm[b.key]; ok {
-                        panic(DuplicateBindingError{KeyError{Key: b.key}})
-                    }
-                    pm[b.key] = b.provider
-                }
-                return true
-            })
-            if am != nil {
-                for k, aps := range am {
-                    pm[k] = newArrayProvider(k.ty, aps)
-                }
-            }
-            return pm
-        */
+        if (am != null) {
+            am.forEach((k, aps) -> {
+                pm.put(k, new ArrayProvider(k.ty, aps));
+            });
+        }
+        return pm;
     }
 
     @Immutable
