@@ -10,10 +10,10 @@ public class InjectTest extends TestCase {
 
     public void testApp() {
         Bindings bs = new Bindings(ImmutableList.of(
-                new Binding(new Key(Integer.class, false, null), new ConstProvider(420))
+                new Binding(Key.<Integer>of(), new ConstProvider<>(420))
         ));
         Injector inj = new Injector(bs, null);
         System.out.println(inj.maybeProvide(injectorKey));
-        System.out.println(inj.maybeProvide(new Key(Integer.class, false, null)));
+        System.out.println(inj.maybeProvide(Key.<Integer>of()));
     }
 }

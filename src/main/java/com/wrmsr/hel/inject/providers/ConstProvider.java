@@ -1,26 +1,28 @@
 package com.wrmsr.hel.inject.providers;
 
 import com.wrmsr.hel.inject.Key;
+import com.wrmsr.hel.inject.Provider;
+import com.wrmsr.hel.inject.ProviderFn;
+import com.wrmsr.hel.inject.TypeLit;
 
-import java.lang.reflect.Type;
 import java.util.function.Function;
 
 import static java.util.Objects.requireNonNull;
 
-public final class ConstProvider implements Provider {
-    private final Object v;
+public final class ConstProvider<T> implements Provider<T> {
+    private final T v;
 
-    public ConstProvider(Object v) {
+    public ConstProvider(T v) {
         this.v = requireNonNull(v);
     }
 
     @Override
-    public Type providedTy(Function<Key, Type> rec) {
-        return v.getClass();
+    public TypeLit<T> providedTy(Function<Key<T>, TypeLit<T>> rec) {
+        return new TypeLit<>(v.getClass());
     }
 
     @Override
-    public ProviderFn providerFn() {
+    public ProviderFn<T> providerFn() {
         return inj -> v;
     }
 }

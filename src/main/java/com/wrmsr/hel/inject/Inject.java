@@ -8,8 +8,6 @@ TODO (style):
 package com.wrmsr.hel.inject;
 
 import com.wrmsr.hel.inject.exceptions.DuplicateBindingException;
-import com.wrmsr.hel.inject.providers.MultiProvider;
-import com.wrmsr.hel.inject.providers.Provider;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,9 +18,9 @@ public final class Inject {
     private Inject() {
     }
 
-    static Map<Key, Provider> makeProviderMap(Bindings bs) {
-        Map<Key, Provider> pm = new HashMap<>();
-        Map<Key, List<Provider>> mm = null;
+    static Map<Key<?>, Provider<?>> makeProviderMap(Bindings bs) {
+        Map<Key<?>, Provider<?>> pm = new HashMap<>();
+        Map<Key<?>, List<Provider<?>>> mm = null;
         for (Binding b : bs) {
             if (b.key.multi) {
                 if (mm == null) {
@@ -37,12 +35,13 @@ public final class Inject {
             }
         }
         if (mm != null) {
-            mm.forEach((k, aps) -> {
-                pm.put(k, new MultiProvider(k.ty, aps));
+            mm.forEach((k, mps) -> {
+                // FIXME:
+                // pm.put(k, new MultiProvider<>(k.ty, mps));
             });
         }
         return pm;
     }
 
-    public static final Key injectorKey = new Key(Injector.class, false, null);
+    public static final Key<Injector> injectorKey = new Key<>(TypeLit.of(), false, null);
 }
